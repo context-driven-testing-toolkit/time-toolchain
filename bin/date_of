@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Format ANY date in ANY format, consistently. Output will have the
+# same form as produced by `date --iso-8601=seconds`
+#
+# Sample output: 2016-04-21T12:52:24-0400
+#
+# TODO: Does not handle fortnights.
+
+if [ -z "$1" ]
+then
+    echo "Usage: `basename $0` <a date>"
+  exit 1
+fi
+
+result=$(echo "$@" | perl -lwne \
+     '
+use Date::Manip;
+use Date::Manip::Date;
+
+my $stamp=ParseDateString("$_");
+
+$date = new Date::Manip::Date($stamp);
+
+print $date->printf("%O%z") . "\n";
+   ')
+
+if [ -z $result ]
+then
+    echo "Couldn't parse: $@" \
+        | perl -ne 'print STDERR'
+    exit 1
+fi
+
+echo $result

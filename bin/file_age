@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]
+then
+    echo "Usage: `basename $0` <path>"
+    exit 1
+elif [ ! -e "$1" ]
+then
+     exit 1
+fi
+
+# Get the file's last modified date and compare to current time.
+#
+# cf: http://stackoverflow.com/a/9611420/55478
+
+duration_since_last_modified() {
+    file="$1"
+
+    datediff -i %s -f %S \
+             "$(date -r $file +%s)" \
+             now
+}
+
+duration_since_last_modified "$1"

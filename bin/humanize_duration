@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Given a list of integer durations in seconds, converts each number to a humanized time duration
+
+if [ ! -z "$1" ]
+then
+  echo "ERROR: $(basename $0) can't take input from stdin, only via a pipe. Sorry!"
+  exit 1
+fi
+
+perl -wlne '
+BEGIN{
+  use Time::Duration;
+};
+next if m{^(#.*|\s*)$};
+print duration($_);
+' $@

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+# Given a date string, tell me how long ago it was, in words.
+# Eg: 7 hours ago.
+
+if [ -z "$1" ]
+then
+  echo "Usage: `basename $0` <date string>"
+  exit 1
+fi
+
+humanize_duration () {
+    perl -wlne '
+BEGIN{
+  use Time::Duration;
+};
+next if m{^(#.*|\s*)$};
+print duration($_);
+' $@
+
+}
+
+date_of () {
+    result=$(echo "$@" | perl -lwne \
+                              '
+use Date::Manip;
+use Date::Manip::Date;
+
+my $stamp=ParseDateString("$_");
+
+$date = new Date::Manip::Date($stamp);
+
+print $date->printf("%O%z") . "\n";
+   ')
+
+    if [ -z $result ]
+    then
+        echo "Couldn't parse: $@" \
+            | perl -ne 'print STDERR'
+        exit 1
+    fi
+
+    echo $result
+}
+
+# Given two time stamps:
+current_date=$(date -u +%s)
+historical_date=$(date --date $(date_of $@) +%s)
+
+# Subtract the two timestamps to get a duration in seconds.
+duration_in_seconds=$((${current_date} - ${historical_date}))
+
+how_long=$(
+    echo $duration_in_seconds \
+        | humanize_duration)
+
+echo "${how_long}"
